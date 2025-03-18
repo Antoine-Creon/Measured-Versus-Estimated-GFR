@@ -1,0 +1,41 @@
+---
+title: "Measured Versus Estimated GFR"
+
+author:
+  - name: Antoine Créon
+    affiliations:
+      - ref: ki
+    orcid: 0009-0006-6498-0257
+affiliations:
+  - id: ki
+    name: Department of Medical Epidemiology and Biostatistics, Karolinska Institute, Stockholm, Sweden
+
+date: last-modified
+date-format: long
+
+bibliography: ../docs/references.bibtex
+reference-location: margin
+---
+
+# Measured Versus Estimated GFR
+
+## Overview  
+This repository contains the analysis code for the project *[PROJECT NAME]*, associated with the manuscript submitted to **[JOURNAL NAME]**.  
+
+## Team 
+
+
+## Objectives  
+- 
+
+
+## Installation & Dependencies  
+To run the analysis, ensure you have the following **R packages** installed:  
+
+R version
+
+
+## Description of scripts (which script does what).
+
+
+
