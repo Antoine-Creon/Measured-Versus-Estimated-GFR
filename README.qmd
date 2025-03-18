@@ -1,6 +1,8 @@
 ---
 title: "Measured Versus Estimated GFR"
 
+format: gfm
+
 author:
   - name: Antoine Créon
     affiliations:
