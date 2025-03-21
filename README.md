@@ -9,18 +9,18 @@ This repository contains the analysis code for the project *[PROJECT NAME]*, led
 ) and associated with the manuscript submitted to **[JOURNAL NAME]**.  
 
 ### Team 
-[Edouard L. Fu](https://edouard-fu.github.io/)$^{1,2*}$, [Antoine Créon](https://ki.se/en/people/antoine-creon)$^{1*}$, Josef Coresh$^{3,4}$, Morgan E. Grams$^5$, Michael G. Shlipak$^6$, Lesley A. Inker$^7$, Andrew S. Levey$^7$, [Juan-Jesus Carrero](https://ki.se/en/people/juan-jesus-carrero)$^{1,8}$
+[Edouard L. Fu](https://edouard-fu.github.io/)<sup>1,2*</sup>, [Antoine Créon](https://ki.se/en/people/antoine-creon)<sup>1\*</sup>, Josef Coresh<sup>3,4</sup>, Morgan E. Grams<sup>5</sup>, Michael G. Shlipak<sup>6</sup>, Lesley A. Inker<sup>7</sup>, Andrew S. Levey<sup>7</sup>, [Juan-Jesus Carrero](https://ki.se/en/people/juan-jesus-carrero)<sup>1,8</sup>
 
-- $^1$ Department of Medical Epidemiology and Biostatistics, Karolinska Institute, Stockholm, Sweden
-- $^2$ Department of Clinical Epidemiology, Leiden University Medical Center, Leiden, the Netherlands
-- $^3$ Optimal Aging Institute and Division of Epidemiology, Department of Population Health, New York University Grossman School of Medicine, New York, New York
-- $^4$ Department of Epidemiology, Johns Hopkins University Bloomberg School of Public Health, Baltimore, Maryland
-- $^5$ Division of Precision Medicine, Department of Medicine, New York University Grossman School of Medicine, New York, New York
-- $^6$ Kidney Health Research Collaborative, Department of Medicine, San Francisco Veterans Affairs Health Care System and University of California San Francisco, San Francisco, California, USA
-- $^7$ Division of Nephrology, Department of Internal Medicine, Tufts Medical Center, Boston, Massachusetts
-- $^8$ Division of Nephrology, Department of Clinical Sciences, Karolinska Institute, Danderyd Hospital, Stockholm, Sweden
+- <sup>1</sup> Department of Medical Epidemiology and Biostatistics, Karolinska Institute, Stockholm, Sweden
+- <sup>2</sup> Department of Clinical Epidemiology, Leiden University Medical Center, Leiden, the Netherlands
+- <sup>3</sup> Optimal Aging Institute and Division of Epidemiology, Department of Population Health, New York University Grossman School of Medicine, New York, New York
+- <sup>4</sup> Department of Epidemiology, Johns Hopkins University Bloomberg School of Public Health, Baltimore, Maryland
+- <sup>5</sup> Division of Precision Medicine, Department of Medicine, New York University Grossman School of Medicine, New York, New York
+- <sup>6</sup> Kidney Health Research Collaborative, Department of Medicine, San Francisco Veterans Affairs Health Care System and University of California San Francisco, San Francisco, California, USA
+- <sup>7</sup> Division of Nephrology, Department of Internal Medicine, Tufts Medical Center, Boston, Massachusetts
+- <sup>8</sup> Division of Nephrology, Department of Clinical Sciences, Karolinska Institute, Danderyd Hospital, Stockholm, Sweden
 
-$^*$ These authors contributed equally to this work as co-first authors
+<sup>\*</sup> These authors contributed equally to this work as co-first authors
 
 Correspondence: [Dr. Edouard L. Fu](e.l.fu@lumc.n)
 
@@ -39,7 +39,7 @@ Stockholm, Sweden, January 2011 to December 2021
 
 ### Exposures
 
-$mGFR$, $eGFR_{cr}$, $eGFR_{cys}$ and $eGFR_{cr-cys}$.
+mGFR, eGFR<sub>cr</sub>, eGFR<sub>cys</sub> and eGFR<sub>cr-cys</sub>.
 
 ## Installation & Dependencies  
 ### Operating system 
@@ -73,19 +73,22 @@ IDE RStudio 2024.12.1+563 *Kousa Dogwood* for windows
 ## Description of scripts (which script does what).
 
 - Data preparation and cleaning
-  - XX: labeling of the variables. Definitions of the variables are provided in the supplementary material.
-  - XX: missing data description, and imputation using MICE or SMC-FCS.
+  - `01_covariates-naming.R`: labeling of the variables. Definitions of the variables are provided in the supplementary material.
+  - `02_missing-data-imputation.R`: missing data description, and imputation using MICE or SMC-FCS.
 - Main analysis
-  - XX: helper functions used in the survival analyses
-  - XX: main analysis
+  - `03_helper-functions-survival.R`: helper functions used in the survival analyses
+  - `04_main-analysis_CKDEPI2021.R`: mGFR and eGFR versus health outcomes after imputation by MICE
 - Supporting analyses:
-  - XX: EKFC
-  - XX: Plots by biomarkers 
+  - `05_supporting-analyses_EKFC_CKDEPI2009-12.R`: main analysis but using the EKFC and CKD-EPI 2009-2012 equations
 - Sensitivity analyses:
-  - XX: analysis after multiple imputation by SMC-FCS
-  - XX: complete cases analysis
-  - XX: analysis after exclusion of kidney transplant recipients
-  - XX: analysis after exclusion of .. and inclusion of ..
+  - `06_sensitivity-analysis_without-UACR-enrichment.R`: analysis without converting PCR and dipstick results to UACR.
+  - `07_sensitivity-analysis_without-KTR.R`: analysis after exclusion of kidney transplant recipients
+  - `08_sensitivity-analysis_prevalent-HF_incident-MACE-AKI.R`: analysis after 
+    - exclusion of individuals with history of AKI for the outcome AKI
+    - exclusion of individuals with history of MACE for the outcome MACE
+    - inclusion of individuals with history of heart failure for the outcome hospitalization with heart failure
+  - `09_sensitivity-analysis_SMC-FCS.R`: main analysis after multiple imputation by SMC-FCS
+  - `10_sensitivity-analyses_complete-cases.R`: complete cases analysis
 
 
 ## Data sharing statement
