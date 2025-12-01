@@ -9,7 +9,7 @@ This repository contains the analysis code for the project *[PROJECT NAME]*, led
 ) and associated with the manuscript submitted to **[JOURNAL NAME]**.  
 
 ### Team 
-[Edouard L. Fu](https://edouard-fu.github.io/)<sup>1,2*</sup>, [Antoine Créon](https://ki.se/en/people/antoine-creon)<sup>1\*</sup>, Josef Coresh<sup>3,4</sup>, Morgan E. Grams<sup>5</sup>, Michael G. Shlipak<sup>6</sup>, Lesley A. Inker<sup>7</sup>, Andrew S. Levey<sup>7</sup>, [Juan-Jesus Carrero](https://ki.se/en/people/juan-jesus-carrero)<sup>1,8</sup>
+[Edouard L. Fu](https://edouard-fu.github.io/)<sup>1,2*</sup>, [Antoine Créon](https://antoine-creon.github.io/)<sup>1\*</sup>, Josef Coresh<sup>3,4</sup>, Morgan E. Grams<sup>5</sup>, Michael G. Shlipak<sup>6</sup>, Lesley A. Inker<sup>7</sup>, Andrew S. Levey<sup>7</sup>, [Juan-Jesus Carrero](https://ki.se/en/people/juan-jesus-carrero)<sup>1,8</sup>
 
 - <sup>1</sup> Department of Medical Epidemiology and Biostatistics, Karolinska Institute, Stockholm, Sweden
 - <sup>2</sup> Department of Clinical Epidemiology, Leiden University Medical Center, Leiden, the Netherlands
@@ -35,7 +35,7 @@ Cohort study using routinely collected healthcare data
 Stockholm, Sweden, January 2011 to December 2021
 
 ### Participants
-6,059 participants aged 18 years or older with plasma iohexol testing and concurrent measurements of creatinine and cystatin C.
+6,174 participants aged 18 years or older with plasma iohexol testing and concurrent measurements of creatinine and cystatin C.
 
 ### Exposures
 
@@ -62,7 +62,6 @@ IDE RStudio 2024.12.1+563 *Kousa Dogwood* for windows
 - `mice` 3.16.0
 - `micemd` 1.10.0
 - `mitools` 2.4
-- `smcfcs` 1.9.0
 - `rms` 6.8.2
 - `Hmisc` 5.2.0
 - `survival` 3.7.0
@@ -70,25 +69,18 @@ IDE RStudio 2024.12.1+563 *Kousa Dogwood* for windows
 - `ggokabeito` 0.1.0
 - `gt` 0.11.1
 
-## Description of scripts (which script does what).
+## Description of scripts
 
-- Data preparation and cleaning
-  - `01_covariates-naming.R`: labeling of the variables. Definitions of the variables are provided in the supplementary material.
-  - `02_missing-data-imputation.R`: missing data description, and imputation using MICE or SMC-FCS.
-- Main analysis
-  - `03_helper-functions-survival.R`: helper functions used in the survival analyses
-  - `04_main-analysis_CKDEPI2021.R`: mGFR and eGFR versus health outcomes after imputation by MICE
-- Supporting analyses:
-  - `05_supporting-analyses_EKFC_CKDEPI2009-12.R`: main analysis but using the EKFC and CKD-EPI 2009-2012 equations
-- Sensitivity analyses:
-  - `06_sensitivity-analysis_without-UACR-enrichment.R`: analysis without converting PCR and dipstick results to UACR.
-  - `07_sensitivity-analysis_without-KTR.R`: analysis after exclusion of kidney transplant recipients
-  - `08_sensitivity-analysis_prevalent-HF_incident-MACE-AKI.R`: analysis after 
-    - exclusion of individuals with history of AKI for the outcome AKI
-    - exclusion of individuals with history of MACE for the outcome MACE
-    - inclusion of individuals with history of heart failure for the outcome hospitalization with heart failure
-  - `09_sensitivity-analysis_SMC-FCS.R`: main analysis after multiple imputation by SMC-FCS
-  - `10_sensitivity-analyses_complete-cases.R`: complete cases analysis
+| Script | Description |
+|--------|-------------|
+| `01_missing-data-imputation.R` | Performs multiple imputation using MICE (Multivariate Imputation by Chained Equations) for missing UACR and BMI values. Includes cubic spline transformations and Nelson-Aalen cumulative hazard estimates as auxiliary variables. |
+| `02_helper-functions-survival.R` | Defines helper functions for eGFR calculations (CKD-EPI 2009/2021, EKFC), Cox proportional hazards model fitting, term plot extraction, Rubin's rules pooling for multiply imputed data, and visualization of hazard ratios. |
+| `03_analysis-preparation.R` | Prepares the analysis environment by loading packages, defining predictors, covariates, and outcome events (death, KFRT, AKI, MACE, heart failure). |
+| `04_main-analysis_CKDEPI2021.R` | Conducts the main survival analysis using CKD-EPI 2021 equations. Fits Cox models on multiply imputed data, generates hazard ratio plots and summary tables for all outcomes. Excludes patients with prior events for incident outcome analyses. |
+| `05_supporting-analyses_EKFC_CKDEPI2009-12.R` | Performs supporting analyses using alternative eGFR equations (EKFC and CKD-EPI 2009/2012). Generates distribution plots and hazard ratio estimates for comparison with CKD-EPI 2021 results. |
+| `06_sensitivity-analysis_without-UACR-enrichment.R` | Sensitivity analysis excluding the conversion of protein-to-creatinine ratio (PCR) and dipstick results into UACR values. Tests robustness of findings to UACR enrichment assumptions. |
+| `07_sensitivity-analysis_without-KTR.R` | Sensitivity analysis excluding kidney transplant recipients (KTR) from the study population. Evaluates whether results are driven by this subgroup with unique clinical characteristics. |
+| `08_conditional_incidence-rates.R` | Computes conditional incidence rates by eGFR category using Poisson regression with pooling across multiply imputed datasets. Estimates adjusted incidence rates at median covariate values. |
 
 
 ## Data sharing statement
