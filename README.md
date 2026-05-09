@@ -9,7 +9,7 @@ This repository contains the analysis code for the project _Measured and estimat
 
 ## Team 
 
-This study was led by [Edouard L. Fu](https://edouard-fu.github.io/)<sup>1,2*</sup>, [Antoine Créon](https://antoine-creon.github.io/)<sup>2\*</sup> and [Juan Jesus Carrero](https://ki.se/en/research/research-areas-centres-and-networks/research-groups/cardio-renal-epidemiology-juan-jesus-carreros-research-group)<sup>2,10</sup> as part of an international collaboration including Morgan E. Grams<sup>3</sup>, Josef Coresh<sup>4,5</sup>, Arvid Sjölander<sup>2</sup>, Anne-Laure Faucon<sup>2</sup>, Michelle M. Estrella<sup>6,7,8</sup>, Friedo W. Dekker<sup>1</sup>, Michael G. Shlipak<sup>8</sup>, Lesley A. Inker<sup>9</sup> and Andrew S. Levey<sup>9</sup>.
+This study was led by [**Edouard L. Fu**](https://edouard-fu.github.io/)<sup>1,2*</sup>, [**Antoine Créon**](https://antoine-creon.github.io/)<sup>2\*</sup> and [**Juan Jesus Carrero**](https://ki.se/en/research/research-areas-centres-and-networks/research-groups/cardio-renal-epidemiology-juan-jesus-carreros-research-group)<sup>2,10</sup> as part of an international collaboration including Morgan E. Grams<sup>3</sup>, Josef Coresh<sup>4,5</sup>, Arvid Sjölander<sup>2</sup>, Anne-Laure Faucon<sup>2</sup>, Michelle M. Estrella<sup>6,7,8</sup>, Friedo W. Dekker<sup>1</sup>, Michael G. Shlipak<sup>8</sup>, Lesley A. Inker<sup>9</sup> and Andrew S. Levey<sup>9</sup>.
 
 - <sup>1</sup> Department of Clinical Epidemiology, Leiden University Medical Center, Leiden, the Netherlands
 - <sup>2</sup> Department of Medical Epidemiology and Biostatistics, Karolinska Institute, Stockholm, Sweden
@@ -64,11 +64,11 @@ Analyses were run under R 4.4.2 and repeated under R 4.5.2 with consistent resul
 | `05_supporting-analyses_EKFC_CKDEPI2009-12.R` | Supporting analyses with EKFC and CKD-EPI 2009/2012 equations; plots and tables. |
 | `06_sensitivity-analysis_without-UACR-enrichment.R` | Sensitivity analysis without UACR enrichment (no PCR/dipstick conversion). |
 | `07_sensitivity-analysis_without-KTR.R` | Sensitivity analysis excluding kidney transplant recipients. |
-| `08_sensitivity-analysis_mortality-in-full-creat-pop.R` | Mortality analysis in full creatinine population vs study population; conditional IRs; hazard ratio contrasts. |
+| `08_sensitivity-analysis_mortality-in-full-creat-pop.R` | Mortality analysis in entire population with creatinine measured in the Stockhom region,vs study population. |
 | `09_conditional_incidence-rates.R` | Conditional incidence rates for continuous GFR across outcomes; includes CKD-EPI 2009, EKFC, and sensitivity variants. |
 | `10_ratios-of-hazard-ratios.R` | Bootstrap + multiple imputation to estimate ratios of hazard ratios (BOOT-MI). |
 
 ## Data sharing statement
-The repository does not contain the raw data used in the analysis. Data will be available for collaborative research under reasonable request and fulfillment of GDPR regulations. For inquiries, please send your proposal to [the Steering Committee of the SCREAM project](juan.jesus.carrero@ki.se).
+The repository does not contain the raw data used in the analysis. Data will be available for collaborative research under reasonable request and fulfillment of GDPR regulations. For inquiries, please send your proposal to [the Steering Committee of the SCREAM project](mailto:juan.jesus.carrero@ki.se).
 
 
