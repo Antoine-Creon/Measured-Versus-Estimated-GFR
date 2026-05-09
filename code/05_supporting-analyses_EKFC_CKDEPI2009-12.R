@@ -6,16 +6,14 @@
 ################################################################################
 
 ################################################################################
-###                              LOAD DATA                                   ###
+# LOAD DATA ####################################################################
 ################################################################################
 
 # Load packages, helper functions and covariate/predictor lists
-source(here::here(
-   "code",
-   "06_gfr-versus-outcomes_uncensored-KFRT_analysis-preparation.R"
-))
+source(here::here("code", "02_analysis-preparation.R"))
 
-# Load data with events NOT CENSORED AT KFRT
+
+# Original dataset
 data <- read_rds(
    file = here::here("data", "cleaned", "data_not_cens_kfrt_named.rds")
 )
@@ -26,10 +24,10 @@ data_imp <- read_rds(
 )
 
 ################################################################################
-###                            PREPARE THE ANALYSIS                          ###
+# PREPARE THE ANALYSIS #########################################################
 ################################################################################
 
-#  ------------------------ UNCHANGED HELPER FUNCTIONS -------------------------
+## UNCHANGED HELPER FUNCTIONS --------------------------------------------------
 
 #  compute cubic splines
 compute_cubic_splines <- function(.data, .variable) {
@@ -74,7 +72,7 @@ plot_imputed_outcomes <- function(
 }
 
 
-#  --------------------- ADD EKFC and CKDEPI 2009 TO DATASET -------------------
+## ADD EKFC and CKDEPI 2009 TO DATASET -----------------------------------------
 
 # Add EKFC and CKDEPI2009 eGFR to original dataset
 data <- data |>
@@ -99,18 +97,7 @@ data_imp_sensitivity <- data_imp |>
       ckd_epi_2009_cr_s1 = rep(data$ckd_epi_2009_cr, 51),
       ckd_epi_2012_cr_cys_s1 = rep(data$ckd_epi_2012_cr_cys, 51)
    ) |>
-   # cbind(compute_cubic_splines(data, "ekfc_cr")) |>
-   # cbind(compute_cubic_splines(data, "ekfc_cys")) |>
-   # cbind(compute_cubic_splines(data, "ekfc_combined")) |>
-   # cbind(compute_cubic_splines(data, "ckd_epi_2009_cr")) |>
-   # cbind(compute_cubic_splines(data, "ckd_epi_2012_cr_cys")) |>
    mice::as.mids() # reconstruct into a mids object if needed
-
-# Imputed data without individuals with HF at baseline
-# data_imp_se_wo_hf <- data_imp_sensitivity |>
-#    complete(action = 'long', include = TRUE) |> # Extract all completed datasets into a long df
-#    filter(hf == 0) |> # Apply filter to each dataset
-#    mice::as.mids() # reconstruct into a mids object if needed
 
 # EXCLUDE patients with history of MACE (MI and stroke)
 data_imp_wo_mace <- data_imp_sensitivity |>
@@ -130,100 +117,12 @@ data_imp_wo_aki <- data_imp_sensitivity |>
    filter(history_aki == 0) |> # Apply filter to each dataset
    mice::as.mids() # reconstruct into a mids object if needed
 
-################################################################################
-###                           EKFC eGFR distribution                         ###
-################################################################################
-
-data <- data |>
-   mutate(
-      ekfc_cr = ekfc_cr(creat, age, female),
-      ekfc_cys = ekfc_cys(cystatin, age)
-   ) |>
-   rowwise() |>
-   mutate(ekfc_combined = mean(c(ekfc_cr, ekfc_cys))) |>
-   ungroup() |>
-   relocate(ekfc_cr, ekfc_combined, ekfc_cys)
-
-
-gfr_distrib_EKFC <- data |>
-   select(mgfr, ekfc_cr, ekfc_cys, ekfc_combined) |>
-   pivot_longer(
-      cols = everything(),
-      names_to = "Equation",
-      values_to = "GFR"
-   ) |>
-   mutate(
-      Equation = factor(
-         Equation,
-         levels = c("mgfr", "ekfc_cr", "ekfc_cys", "ekfc_combined")
-      ),
-      linesize = if_else(Equation == "mgfr", 1, 0)
-   )
-
-.palette <- palette_okabe_ito(c(1, 3, 5, 7))
-
-.custom_labels <- c(
-   expression("mGFR"),
-   expression(paste("eGFR"[EKFCcr])),
-   expression(paste("eGFR"[EKFCcys])),
-   expression(paste("eGFR"[EKFCcr - cys]))
-)
-
-gfr_distrib_EKFC_plot <- gfr_distrib_EKFC |>
-   ggplot(aes(
-      x = GFR,
-      y = after_stat(density),
-      color = Equation,
-      fill = Equation,
-      linewidth = factor(linesize)
-   )) +
-   geom_density(alpha = 0.2, position = "identity") +
-   labs(x = expression("GFR, mL/min/1.73m"^2), y = "Density", tag = "A") +
-   scale_color_manual(name = NULL, values = .palette, labels = .custom_labels) +
-   scale_fill_manual(name = NULL, values = .palette, labels = .custom_labels) +
-   scale_x_continuous(
-      breaks = c(15, 30, 45, 60, 75, 90, 120),
-      limits = c(5, 120)
-   ) +
-   scale_linewidth_manual(name = NULL, values = c(0.5, 2)) +
-   guides(linewidth = "none", color = "none", fill = "none") +
-   theme_bw() +
-   theme(
-      aspect.ratio = 0.75,
-      legend.position = "inside",
-      legend.justification.inside = c(0, 1), # Position in upper-right corner
-      legend.background = element_rect(
-         color = "black",
-         fill = "white",
-         linewidth = 0.1
-      ), # Black border, white background
-      legend.box.margin = margin(
-         t = 0.5,
-         r = 0.5,
-         b = 0.5,
-         l = 0.5,
-         unit = "mm"
-      ),
-      legend.margin = margin(t = 0.5, r = 0.5, b = 0.5, l = 0.5, unit = "mm"),
-      legend.text = element_text(size = 8),
-      legend.key.size = unit(0.2, "cm"), # Adjust the size of the legend keys
-      legend.spacing = unit(0.1, "cm"),
-      axis.title = element_text(size = 10),
-      plot.title = element_text(size = 11),
-      plot.margin = unit(c(0, 0, 0, 0), "cm")
-   )
-
-save(
-   gfr_distrib_EKFC_plot,
-   file = here::here("output", "r_objects", "eGFR-EKFC_distribution.rda")
-)
-
 
 ################################################################################
-###                           EKFC EGFR VERSUS OUTCOMES                      ###
+# EKFC EGFR VERSUS OUTCOMES ####################################################
 ################################################################################
 
-# ---------- MODIFY HELPER FUNCTIONS TO HANDLE THE NEW PREDICTORS --------------
+## MODIFY HELPER FUNCTIONS TO HANDLE THE NEW PREDICTORS ------------------------
 
 # Extract termplots from fits on imputed datasets
 ## For each imputation
@@ -392,10 +291,9 @@ summarize_HR_MICE <- function(
 }
 
 
-#  --------------------------- PERFORM THE ANALYSIS ----------------------------
+## PERFORM THE ANALYSIS --------------------------------------------------------
 
 predictors_ekfc <- list("mgfr", "ekfc_cr", "ekfc_cys", "ekfc_combined")
-
 
 # Death and KFRT
 death_kfrt_EKFC_plots <- c(`All-cause Death` = "death", "KFRT" = "rrt") %>%
@@ -410,7 +308,6 @@ death_kfrt_EKFC_plots <- c(`All-cause Death` = "death", "KFRT" = "rrt") %>%
          .trunc = 120
       )
    )
-
 
 # Heart failure excluding patients with history of HF
 wo_hf <- plot_imputed_outcomes(
@@ -439,12 +336,11 @@ wo_AKI <- plot_imputed_outcomes(
    .predictor = predictors_ekfc,
    outcome_element = "aki",
    outcome_name = "AKI",
-   .covariates = covariates[!covariates %in% c("history_aki")],
+   .covariates = covariates,
    .imp_data = data_imp_wo_aki,
    .ref = 90,
    .trunc = 120
 )
-
 
 # Append all lists
 EKFC_plots <- append(
@@ -499,7 +395,7 @@ wo_AKI_tbl <- summarize_HR_MICE(
    .predictor = predictors_ekfc,
    outcome_element = "aki",
    outcome_name = "AKI",
-   .covariates = covariates[!covariates %in% c("history_aki")],
+   .covariates = covariates,
    .imp_data = data_imp_wo_aki,
    .ref = 90,
    .trunc = 120
@@ -529,96 +425,15 @@ EKFC_tbl <- purrr::reduce(
       `Heart failure`
    )
 
-
 # Save  as R object to be called and modified in analysis reports
 save(EKFC_tbl, file = here::here("output", "r_objects", "EKFC_tbl.rda"))
 
 
 ################################################################################
-###                       CKD-EPI2009 eGFR distribution                      ###
+# CKDEPI 2009 EGFR VERSUS OUTCOMES #############################################
 ################################################################################
 
-gfr_distrib_CKDEPI2009 <- data |>
-   select(mgfr, ckd_epi_2009_cr, ckd_epi_2012_cys, ckd_epi_2012_cr_cys) |>
-   pivot_longer(
-      cols = everything(),
-      names_to = "Equation",
-      values_to = "GFR"
-   ) |>
-   mutate(
-      Equation = factor(
-         Equation,
-         levels = c(
-            "mgfr",
-            "ckd_epi_2009_cr",
-            "ckd_epi_2012_cys",
-            "ckd_epi_2012_cr_cys"
-         )
-      ),
-      linesize = if_else(Equation == "mgfr", 1, 0)
-   )
-
-.palette <- palette_okabe_ito(c(1, 3, 5, 7))
-
-.custom_labels <- c(
-   expression("mGFR"),
-   expression(paste("eGFR"[CKDEPI2009 - cr])),
-   expression(paste("eGFR"[CKDEPI2009 - cys])),
-   expression(paste("eGFR"[CKDEPI2009 - cr - cys]))
-)
-
-gfr_distrib_CKDEPI2009_plot <- gfr_distrib_CKDEPI2009 |>
-   ggplot(aes(
-      x = GFR,
-      y = after_stat(density),
-      color = Equation,
-      fill = Equation,
-      linewidth = factor(linesize)
-   )) +
-   geom_density(alpha = 0.2, position = "identity") +
-   labs(x = expression("GFR, mL/min/1.73m"^2), y = "Density", tag = "A") +
-   scale_color_manual(name = NULL, values = .palette, labels = .custom_labels) +
-   scale_fill_manual(name = NULL, values = .palette, labels = .custom_labels) +
-   scale_x_continuous(breaks = c(15, 30, 45, 60, 90, 120), limits = c(5, 120)) +
-   scale_linewidth_manual(name = NULL, values = c(0.5, 2)) +
-   guides(linewidth = "none", color = "none", fill = "none") +
-   theme_bw() +
-   theme(
-      aspect.ratio = 0.75,
-      legend.position = "inside",
-      legend.justification.inside = c(0, 1), # Position in upper-right corner
-      legend.background = element_rect(
-         color = "black",
-         fill = "white",
-         linewidth = 0.1
-      ), # Black border, white background
-      legend.box.margin = margin(
-         t = 0.5,
-         r = 0.5,
-         b = 0.5,
-         l = 0.5,
-         unit = "mm"
-      ),
-      legend.margin = margin(t = 0.5, r = 0.5, b = 0.5, l = 0.5, unit = "mm"),
-      legend.text = element_text(size = 8),
-      legend.key.size = unit(0.2, "cm"), # Adjust the size of the legend keys
-      legend.spacing = unit(0.1, "cm"),
-      axis.title = element_text(size = 10),
-      plot.title = element_text(size = 11),
-      plot.margin = unit(c(0, 0, 0, 0), "cm")
-   )
-
-save(
-   gfr_distrib_CKDEPI2009_plot,
-   file = here::here("output", "r_objects", "eGFR-CKDEPI2009_distribution.rda")
-)
-
-
-################################################################################
-###                    CKDEPI 2009 EGFR VERSUS OUTCOMES                      ###
-################################################################################
-
-# ---------- MODIFY HELPER FUNCTIONS TO HANDLE THE NEW PREDICTORS --------------
+## MODIFY HELPER FUNCTIONS TO HANDLE THE NEW PREDICTORS ------------------------
 
 # Extract termplots from fits on imputed datasets
 ## For each imputation
@@ -758,7 +573,7 @@ plot_HRs <- function(.extracted_termplots, .outcome) {
 }
 
 
-#  --------------------------- PERFORM THE ANALYSIS ----------------------------
+## PERFORM THE ANALYSIS --------------------------------------------------------
 
 predictors_ckdepi2009 <- list(
    "mgfr",
@@ -812,7 +627,7 @@ wo_AKI_CKDEPI2009 <- plot_imputed_outcomes(
    .predictor = predictors_ckdepi2009,
    outcome_element = "aki",
    outcome_name = "AKI",
-   .covariates = covariates[!covariates %in% c("history_aki")],
+   .covariates = covariates,
    .imp_data = data_imp_wo_aki,
    .ref = 90,
    .trunc = 120
@@ -894,7 +709,7 @@ wo_AKI_CKDEPI2009_tbl <- summarize_HR_MICE(
    .predictor = predictors_ckdepi2009,
    outcome_element = "aki",
    outcome_name = "AKI",
-   .covariates = covariates[!covariates %in% c("history_aki")],
+   .covariates = covariates,
    .imp_data = data_imp_wo_aki,
    .ref = 90,
    .trunc = 120

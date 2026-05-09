@@ -13,13 +13,10 @@
 # Perform these steps for each studied outcome
 
 ################################################################################
-###                 Load imputed dataset and helper functions                ###
+# Load imputed dataset and helper functions ####################################
 ################################################################################
 
-source(here::here(
-  "code",
-  "06_gfr-versus-outcomes_uncensored-KFRT_analysis-preparation.R"
-))
+source(here::here("code", "02_analysis-preparation.R"))
 
 data_imp <- read_rds(
   file = here::here("data", "cleaned", "not_cens_kfrt_imp_cs.rds")
@@ -45,10 +42,10 @@ data_imp_wo_aki <- data_imp |>
 
 
 ################################################################################
-###                              PERFORM ANALYSES                            ###
+# PERFORM ANALYSES #############################################################
 ################################################################################
 
-#  --------------------------------- Plots -------------------------------------
+## Plots -----------------------------------------------------------------------
 
 # Prevalent patients (for all-cause mortality and KFRT)
 plots_ref90_imp <- events %>%
@@ -91,14 +88,14 @@ wo_AKI <- plot_imputed_outcomes(
   .predictor = predictors,
   outcome_element = "aki",
   outcome_name = "AKI",
-  .covariates = covariates[!covariates %in% c("history_aki")],
+  .covariates = covariates,
   .imp_data = data_imp_wo_aki,
   .ref = 90,
   .trunc = 120
 )
 
 
-#  -------------------------------- Tables -------------------------------------
+## Tables ----------------------------------------------------------------------
 
 # Prevalent patients (for all-cause mortality and KFRT)
 tbl_ref90_imp <- events %>%
@@ -143,7 +140,7 @@ wo_AKI_tbl <- summarize_HR_MICE(
   .predictor = predictors,
   outcome_element = "aki",
   outcome_name = "AKI",
-  .covariates = covariates[!covariates %in% c("history_aki")],
+  .covariates = covariates,
   .imp_data = data_imp_wo_aki,
   .ref = 90,
   .trunc = 120

@@ -6,7 +6,7 @@
 ################################################################################
 
 ################################################################################
-###                               eGFR-cr EQUATIONS                          ###
+# eGFR EQUATIONS ###############################################################
 ################################################################################
 
 ckd_epi_2009_cr <- function(creatinine, age, female) {
@@ -23,6 +23,21 @@ ckd_epi_2009_cr <- function(creatinine, age, female) {
          (pmin(creatinine / k, 1)^alpha) *
          (pmax(creatinine / k, 1)^(-1.209)) *
          (0.9929^age)
+   ))
+}
+
+ckd_epi_2012_cys <- function(cystatin, age, female) {
+   return(ifelse(
+      female == 1,
+      133 *
+         (pmin(cystatin / 0.8, 1)^(-0.499)) *
+         (pmax(cystatin / 0.8, 1)^(-1.328)) *
+         (0.9962^age) *
+         0.932,
+      133 *
+         (pmin(cystatin / 0.8, 1)^(-0.499)) *
+         (pmax(cystatin / 0.8, 1)^(-1.328)) *
+         (0.9962^age)
    ))
 }
 
@@ -162,10 +177,10 @@ ekfc_cys <- function(cystatin, age) {
 }
 
 ################################################################################
-###                          TO PLOT OR MAKE TABLES                          ###
+# TO PLOT OR MAKE TABLES  ######################################################
 ################################################################################
 
-# -------------------------- to plot each model  -------------------------------
+## to plot each model  ---------------------------------------------------------
 # For one outcome, we want the 4 predictors to be on the same graph.
 # the input is an extracted termplot as given by the functions below
 
@@ -254,7 +269,7 @@ plot_HRs <- function(.extracted_termplots, .outcome) {
 }
 
 
-# -------------------------- to summarize each model  --------------------------
+## to summarize each model  ----------------------------------------------------
 # the input is an extracted termplot as given by the functions below
 # a column for GFR level and each outcome
 # a row for 15-30-45-45-60 ml/min
@@ -287,10 +302,10 @@ format_table <- function(.bound_termplots, .outcome) {
 }
 
 ################################################################################
-###         TO DEAL WITH STANDARD (not multiply imputed) DATASETS            ###
+# TO DEAL WITH STANDARD (not multiply imputed) DATASETS ########################
 ################################################################################
 
-# -------- to compute the fits of specific predictors and covariates -----------
+## to compute the fits of specific predictors and covariates -------------------
 # The function takes the outcome, the predictor, the covariates and the data
 # It returns the coxph fit
 # Spline option: linear or cubic (default)
@@ -345,7 +360,7 @@ compute_fits <- function(
 }
 
 
-# ------- to extract the termplot of the predictor from the coxph fit ----------
+## to extract the termplot of the predictor from the coxph fit -----------------
 
 extract_termplot <- function(fit, ref, truncate) {
    ptemp <- termplot(fit, se = TRUE, plot = FALSE)
@@ -387,7 +402,7 @@ extract_termplot <- function(fit, ref, truncate) {
 }
 
 
-# --------------------- to extract fit + termplot + plot them  -----------------
+## to extract fit + termplot + plot them  --------------------------------------
 # To be used with a named list of outcomes + imap() or map2(outcome, names(outcome))
 
 plot_outcomes <- function(
@@ -408,7 +423,7 @@ plot_outcomes <- function(
 }
 
 
-# -------------------- to extract fit + termplot + summarize HRs  --------------
+## to extract fit + termplot + summarize HRs  ----------------------------------
 
 summarize_HR_CCA <- function(
    .predictor,
@@ -429,10 +444,10 @@ summarize_HR_CCA <- function(
 
 
 ################################################################################
-###                             FOR IMPUTED DATASETS                         ###
+# FOR IMPUTED DATASETS #########################################################
 ################################################################################
 
-# -- to compute the fits of predictors and covariates in each imputed dataset --
+## to compute the fits of predictors and covariates in each imputed dataset ----
 
 compute_fits_imp_data <- function(
    .outcome,
@@ -522,7 +537,7 @@ compute_fits_imp_data <- function(
 }
 
 
-# ------- to extract the termplot of the predictor from the coxph fit ----------
+## to extract the termplot of the predictor from the coxph fit -----------------
 # The difference with the first function is that
 # The function extract the termplot of each imputed dataset
 # HR and CI are not computed (must be pooled first)
@@ -573,7 +588,7 @@ extract_termplot_imp <- function(.imp_fits, ref, truncate) {
       map(~ extract_each_termplotof_imp(.x, ref, truncate))
 }
 
-# ------------- to pool the termplots from each imputed dataset ----------------
+## to pool the termplots from each imputed dataset -----------------------------
 # First all data set must be col bound
 # so that for each value of x1, the estimate and its SE can be pooled
 # It needs to work rowwise
@@ -613,7 +628,7 @@ pool_termplots <- function(.extracted_termplots) {
 }
 
 
-# ----------------------- to do all steps above + plot -------------------------
+## to do all steps above + plot ------------------------------------------------
 
 plot_imputed_outcomes <- function(
    .predictor,
@@ -646,7 +661,7 @@ plot_imputed_outcomes <- function(
 }
 
 
-# ----------------- to extract fit + termplot + pool summarize HRs  ------------
+## to extract fit + termplot + pool summarize HRs  -----------------------------
 
 summarize_HR_MICE <- function(
    .predictor,
@@ -676,4 +691,130 @@ summarize_HR_MICE <- function(
       map(~ pool_termplots(.x)) %>%
       list_rbind() %>%
       format_table(., .outcome = {{ outcome_name }})
+}
+
+
+################################################################################
+# CONDITIONAL INCIDENCE RATES ##################################################
+################################################################################
+
+cond_IR <- function(
+   imputed_dataset,
+   .outcome,
+   .predictor,
+   .covariates,
+   .thresholds_to_estimate = c(15, 30, 45, 60, 75, 90, 120)
+) {
+   ## Step 0: Prepare variables -------------------------------------------------
+
+   # Time to oucome
+   .time_to_outcome <- paste0("time_to_", .outcome)
+
+   # name of the predictor as in imputed data
+   .imp_predictor <- paste0(.predictor, "_s1")
+
+   # string of covariates
+   .covariates_string <- paste(.covariates, collapse = " + ")
+
+   ## Step 1: Model fitting in MI datasets and pool coefficients -----------------
+   # /!\ rms::Glm requires the offset to be passed in the formula
+   .poisson_formula <- paste0(
+      .outcome,
+      " == 1 ~ rcs(",
+      .imp_predictor,
+      ",4) + ",
+      .covariates_string,
+      " + offset(log(",
+      .time_to_outcome,
+      "))"
+   )
+
+   fit_mi <- with(
+      imputed_dataset,
+      rms::Glm(
+         formula = as.formula(.poisson_formula),
+         family = poisson(link = "log")
+      )
+   )
+
+   # Stack all imputed datasets to compute overall medians
+   all_imputed <- map_dfr(
+      seq_len(imputed_dataset$m),
+      ~ complete(imputed_dataset, .x)
+   )
+
+   # Compute median for each covariate (mode for factors)
+   median_values <- list()
+
+   for (cov in .covariates) {
+      col <- all_imputed[[cov]]
+      if (is.numeric(col)) {
+         median_values[[cov]] <- median(col, na.rm = TRUE)
+      } else if (is.factor(col)) {
+         # Use mode (most frequent level) for factors
+         median_values[[cov]] <- names(which.max(table(col)))
+      } else {
+         median_values[[cov]] <- col[1]
+      }
+   }
+
+   # Step 2: Create prediction data at median values for target GFR categories
+   new_data <- as_tibble_row(median_values) |>
+      select(all_of(.covariates)) |>
+      uncount(length(.thresholds_to_estimate)) |>
+      mutate(
+         !!.imp_predictor := .thresholds_to_estimate,
+         !!.time_to_outcome := 365.25, # Is ignored when using rms::Glm() (but not stats::glm())
+         !!.outcome := 0
+      )
+
+   # Step 3: For each imputation, predict log-rate and its variance
+   m <- length(fit_mi$analyses)
+   n_pred <- nrow(new_data)
+
+   # Store predictions and variances
+   log_rates <- matrix(NA, nrow = n_pred, ncol = m)
+   var_log_rates <- matrix(NA, nrow = n_pred, ncol = m)
+
+   for (i in seq_len(m)) {
+      fit_i <- fit_mi$analyses[[i]]
+
+      # Predict on link scale (log)
+      # /!\ Here, only X*beta is returned, not X*beta + offset. The rate will be per day
+      pred <- predict(fit_i, newdata = new_data, type = "lp", se.fit = TRUE)
+
+      log_rates[, i] <- pred$linear.predictors + log(365.25) # Add the offset manually when using rms::Glm() to convert to person-year
+      var_log_rates[, i] <- pred$se.fit^2
+   }
+
+   # Step 4: Pool using Rubin's rules (for each prediction row)
+   # Q_bar = mean of point estimates
+   Q_bar <- rowMeans(log_rates)
+
+   # W = mean within-imputation variance
+   W <- rowMeans(var_log_rates)
+
+   # B = between-imputation variance
+   B <- apply(log_rates, 1, var)
+
+   # Total variance
+   T_var <- W + (1 + 1 / m) * B
+   T_se <- sqrt(T_var)
+
+   # Step 5: Compute CIs and exponentiate
+   log_rate_pooled <- Q_bar
+
+   conditional_IR <- exp(log_rate_pooled)
+   CI_lower <- exp(log_rate_pooled - qnorm(0.975) * T_se)
+   CI_upper <- exp(log_rate_pooled + qnorm(0.975) * T_se)
+
+   # Results
+   tibble(
+      outcome = .outcome,
+      gfr_type = .predictor,
+      gfr_thresholds = .thresholds_to_estimate,
+      conditional_IR = conditional_IR,
+      CI_lower = CI_lower,
+      CI_upper = CI_upper
+   )
 }

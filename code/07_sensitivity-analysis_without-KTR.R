@@ -6,14 +6,12 @@
 ################################################################################
 
 ################################################################################
-###                              LOAD DATA                                   ###
+# LOAD DATA ####################################################################
 ################################################################################
 
 # Load packages, helper functions and covariate/predictor lists
-source(here::here(
-   "code",
-   "06_gfr-versus-outcomes_uncensored-KFRT_analysis-preparation.R"
-))
+source(here::here("code", "02_analysis-preparation.R"))
+
 
 # MICE-imputed data
 data_imp <- read_rds(
@@ -46,10 +44,10 @@ data_imp_wo_aki_ktr <- data_imp_wo_ktr |>
 
 
 ################################################################################
-###                           PERFORM THE ANALYSIS                           ###
+# PERFORM THE ANALYSIS #########################################################
 ################################################################################
 
-#  -------------------------------- PLOTS --------------------------------------
+## Plots -----------------------------------------------------------------------
 
 # Death and KFRT
 death_kfrt_woKTR_plots <- c(`All-cause Death` = "death", "KFRT" = "rrt") %>%
@@ -64,7 +62,6 @@ death_kfrt_woKTR_plots <- c(`All-cause Death` = "death", "KFRT" = "rrt") %>%
          .trunc = 120
       )
    )
-
 
 # Heart failure excluding patients with history of HF
 wo_hf_woKTR_ <- plot_imputed_outcomes(
@@ -93,12 +90,11 @@ wo_AKI_woKTR_ <- plot_imputed_outcomes(
    .predictor = predictors,
    outcome_element = "aki",
    outcome_name = "AKI",
-   .covariates = covariates[!covariates %in% c("history_aki")],
+   .covariates = covariates,
    .imp_data = data_imp_wo_aki_ktr,
    .ref = 90,
    .trunc = 120
 )
-
 
 # Append all lists
 woKTR_plots <- append(
@@ -110,7 +106,7 @@ woKTR_plots <- append(
 save(woKTR_plots, file = here::here("output", "r_objects", "woKTR_plots.rda"))
 
 
-#  ------------------------------- TABLES --------------------------------------
+## TABLES ----------------------------------------------------------------------
 ## Death and KFRT
 death_kfrt_woKTR_tbl <- c(`All-cause Death` = "death", "KFRT" = "rrt") %>%
    map2(
@@ -154,7 +150,7 @@ wo_AKI_woKTR_tbl <- summarize_HR_MICE(
    .predictor = predictors,
    outcome_element = "aki",
    outcome_name = "AKI",
-   .covariates = covariates[!covariates %in% c("history_aki")],
+   .covariates = covariates,
    .imp_data = data_imp_wo_aki_ktr,
    .ref = 90,
    .trunc = 120
@@ -183,7 +179,6 @@ woKTR_tbl <- purrr::reduce(
       MACE,
       `Heart Failure`
    )
-
 
 # Save  as R object to be called and modified in analysis reports
 save(woKTR_tbl, file = here::here("output", "r_objects", "woKTR_tbl.rda"))

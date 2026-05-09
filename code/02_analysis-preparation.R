@@ -6,33 +6,30 @@
 ################################################################################
 
 ################################################################################
-###                               LOAD FUNCTIONS                             ###
+# LOAD FUNCTIONS ###############################################################
 ################################################################################
 
 pacman::p_load(
   tidyverse,
   here,
-  gt,
-  gtsummary,
   ggokabeito,
   qs,
   Hmisc,
   survival,
   rms,
-  tidycmprsk,
   mice,
   mitools
 )
 
 # Helper functions for the survival analysis
-source(here::here("code", "05_helper-functions-survival.R"))
+source(here::here("code", "01_helper-functions.R"))
 
 
 ################################################################################
-###                        PREPARE THE MAIN ANALYSIS                         ###
+# PREPARE THE MAIN ANALYSIS ####################################################
 ################################################################################
 
-#  -------------------- VECTOR OF PREDICTORS AND COVARIATES --------------------
+## VECTOR OF PREDICTORS AND COVARIATES -----------------------------------------
 
 # List the predictors
 predictors <- list(

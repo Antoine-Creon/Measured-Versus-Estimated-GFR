@@ -7,19 +7,16 @@
 ################################################################################
 
 ################################################################################
-###                     Load data and helper functions                       ###
+# Load data and helper functions ###############################################
 ################################################################################
 
-source(here::here(
-   "code",
-   "06_gfr-versus-outcomes_uncensored-KFRT_analysis-preparation.R"
-))
+source(here::here("code", "02_analysis-preparation.R"))
 
 wo_uacr <- read_rds(
    file = here::here("data", "cleaned", "MICE_UACR-not-enriched.rds")
 )
 
-#  ---------------------------- Prepare datasets -------------------------------
+## Prepare datasets ------------------------------------------------------------
 
 # EXCLUDE patients with history of MACE (MI and stroke)
 data_imp_wo_mace <- wo_uacr |>
@@ -40,10 +37,10 @@ data_imp_wo_aki <- wo_uacr |>
    mice::as.mids() # reconstruct into a mids object if needed
 
 ################################################################################
-###                           Perform analysis                               ###
+# Perform analysis #############################################################
 ################################################################################
 
-#  -------------------------------- Plots --------------------------------------
+## Plots -----------------------------------------------------------------------
 
 death_kfrt_wo_uacr <- c(`All-cause Death` = "death", "KFRT" = "rrt") %>%
    imap(
@@ -86,12 +83,11 @@ wo_AKI_wo_uacr <- plot_imputed_outcomes(
    .predictor = predictors,
    outcome_element = "aki",
    outcome_name = "AKI",
-   .covariates = covariates[!covariates %in% c("history_aki")],
+   .covariates = covariates,
    .imp_data = data_imp_wo_aki,
    .ref = 90,
    .trunc = 120
 )
-
 
 wo_converted_UACR <- append(
    death_kfrt_wo_uacr,
@@ -105,7 +101,7 @@ save(
 )
 
 
-#  -------------------------------- Tables -------------------------------------
+## Tables ----------------------------------------------------------------------
 
 # Tables with HRs
 wo_converted_UACR_tbl <- c(`All-cause Death` = "death", "KFRT" = "rrt") %>%
@@ -150,7 +146,7 @@ wo_AKI_wo_uacr_tbl <- summarize_HR_MICE(
    .predictor = predictors,
    outcome_element = "aki",
    outcome_name = "AKI",
-   .covariates = covariates[!covariates %in% c("history_aki")],
+   .covariates = covariates,
    .imp_data = data_imp_wo_aki,
    .ref = 90,
    .trunc = 120
