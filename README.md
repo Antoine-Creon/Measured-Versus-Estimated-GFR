@@ -5,7 +5,8 @@
 </p>
 
 ## Project Overview  
-This repository contains the analysis code for the project _Measured and estimated glomerular filtration rates and risk of adverse health outcomes_, published in **[JOURNAL NAME]**.  
+This repository contains the analysis code used in the study:
+[Fu EL, Créon A, et al. Measured and estimated glomerular filtration rates and risk of adverse health outcomes. JAMA. Published online June 4, 2026:1-12. doi:10.1001/jama.2026.9639](https://jamanetwork.com/journals/jama/fullarticle/2850099). 
 
 ## Team 
 
@@ -70,5 +71,3 @@ Analyses were run under R 4.4.2 and repeated under R 4.5.2 with consistent resul
 
 ## Data sharing statement
 The repository does not contain the raw data used in the analysis. Data will be available for collaborative research under reasonable request and fulfillment of GDPR regulations. For inquiries, please send your proposal to [the Steering Committee of the SCREAM project](mailto:juan.jesus.carrero@ki.se).
-
-
